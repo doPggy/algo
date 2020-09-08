@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 from queue import Queue
+import math
 # 树节点
 class TNode():
     def __init__(self, value):
@@ -89,52 +90,6 @@ class BSearchTree():
                 parent.left = need_remain
             elif parent.right == node:
                 parent.right = need_remain
-            
-
-
-
-
-    # def delete(self, value):
-    #     # 3 种情况，一种解决对策
-    #     t_ptr   = self.root
-    #     p_t_ptr = None
-    #     while t_ptr:
-    #         if t_ptr.value == value:
-    #             break
-    #         p_t_ptr = t_ptr
-    #         if value < t_ptr.value:
-    #             t_ptr = t_ptr.left
-    #         else:
-    #             t_ptr = t_ptr.right
-    #     #! 没有找到
-    #     if not t_ptr:
-    #         return
-    #     # 已经找到
-    #     # 两个子节点，找替代, 最接近自己的数，所以是右子树的最小值或者左子树的最大值
-    #     min_p_ptr = None
-    #     min_ptr   = None
-    #     if t_ptr.left and t_ptr.right:
-    #         min_ptr     = t_ptr.right
-    #         min_p_ptr   = t_ptr.right
-    #         while min_ptr.left:
-    #             min_p_ptr = min_ptr
-    #             min_ptr   = min_ptr.left
-    #         # 右子树最小节点，替换要删除节点
-    #         t_ptr.value = min_p_ptr.value
-    #         # 这样方便后头删除一个节点的情况
-    #         t_ptr       = min_ptr
-    #         p_t_ptr     = min_p_ptr
-
-    #     # 开始处理只有一个子节点的情况
-    #     need_del    = t_ptr
-    #     # 需要删除的节点的子节点 可能为 None，这样直接包括了删除没有子节点的节点，这类情况
-    #     need_remain = t_ptr.left or t_ptr.right
-    #     if not p_t_ptr: # 删除的是根节点 能走到这，说明这个树本来就只有两个节点，且要删除根节点
-    #         self.root = need_remain
-    #     elif t_ptr == p_t_ptr.left:
-    #         p_t_ptr.left = need_remain
-    #     elif t_ptr == p_t_ptr.right:
-    #         p_t_ptr.right = need_remain
 
     # 中序遍历就是有序序列
     def in_order(self):
@@ -162,46 +117,68 @@ class BSearchTree():
         return max(self._fetch_height(node.left), self._fetch_height(node.right)) + 1
 
     def _draw_tree(self):
-        # self.root = 
-        queue = [ self.root ]
         _draw = ""
-        p     = None
-        while len(queue) > 0:
-            p     = queue.pop()
-            _draw += str(p.value) + '\t'
-            _draw += '\n'
-            if p.left:
-                queue.append(p.left)
-            if p.right:
-                queue.append(p.right)
+        base  = "  "
+        bfs   = self.bfs()
+        # k = log(num) + 1
+        # 求最后一层的层数
+        layer_num = int(math.log(bfs[-1][1], 2)) + 1
+        for i in range(layer_num):
+            start = int(math.pow(2, i))
+            end   = int(math.pow(2, i + 1))
+            for j in range(start, end):
+                if len(bfs) == 0:
+                    _draw += "$" + base + ' '
+                    continue
+                p_id = bfs[0][1]
+                val  = bfs[0][0]
+                if p_id == j:
+                    _draw += str(val) + base + ' '
+                    bfs.pop(0)
+                else:
+                    _draw += "$" + base + ' '
+            _draw += "\n"
         return _draw
     
     def bfs(self):
         return self._bfs(self.root)
     # 广度优先遍历
     # 层序遍历
+    # 以完全二叉树方式编号
     def _bfs(self, node):
+        queue = [ (self.root, 1) ]
+        bfs   = []
+        while len(queue) > 0:
+            p, p_id = queue.pop(0)
+            if p.left:
+                queue.append((p.left, p_id * 2))
+            if p.right:
+                queue.append((p.right, p_id * 2 + 1))
+            bfs.append((p.value, p_id))
+        return bfs
+
 
 
 if __name__ == "__main__":
     nums = [4, 6, 5, 4, 1, 7, 3]
     '''
-          4
-      1       6
-        3   5     7 
-         4
+            4
+      1             6
+        3       5     7 
+             4
     '''
-    bst  = BSearchTree(nums)
+    bst = BSearchTree(nums)
     print(bst)
 
-    print(bst.fetch_height())
-    print(bst.in_order())
+    # print(bst.fetch_height())
+    # print(bst.in_order())
 
     # bst.insert(8)
     # # bst.insert(4)
-    # print(bst)
+    # print(bst.bfs())
 
     # bst.delete(4)
-    # print(bst)
+    print('--------')
 
-    # bst._draw_tree()
+    # print(bst._draw_tree())
+    # print(bst.fetch_height())
