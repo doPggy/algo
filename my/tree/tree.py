@@ -21,6 +21,28 @@ def in_tra(root):
         yield root.value
         yield from in_tra(root.right)
 
+# 非递归莫里斯
+# 遍历空间复杂度是 O(1) ,但是为了方便查看用了一个 list。
+def in_tra_morris(root):
+    r = []
+    while root:
+        if not root.left:
+            r.append(root.value)
+            root = root.right
+        else:
+            tmp = root.left
+            while tmp.right and tmp.right != root:
+                tmp = tmp.right
+            # 说明左子树已经遍历完成
+            if tmp.right == root:
+                tmp.right = None
+                r.append(root.value)
+                root = root.right
+            else:
+                tmp.right = root
+                root = root.left
+    return r
+
 # 层序遍历
 #! 利用一个队列，弹出第一个节点，并将其子节点入队
 def level_tra(root):
@@ -72,3 +94,6 @@ if __name__ == "__main__":
 
     print(level_tra(root))
     print(fetch_height(root))
+
+
+    print(in_tra_morris(root))
