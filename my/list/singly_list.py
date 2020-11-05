@@ -65,7 +65,7 @@ class SList():
     def tail_insert(self):
         pass
 
-    def delete_node(self, data, index):
+    def delete_node(self, index):
         target, pre = self.find_node_and_pre_by_index(index)
         if not target:
             return
