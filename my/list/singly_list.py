@@ -3,6 +3,8 @@ class Node():
     def __init__(self, data = None):
         self.data = data
         self.next = None
+    def __repr__(self):
+        return str(self.data) if self.data else "None"
 
 class SList():
     def __init__(self):
@@ -136,6 +138,7 @@ class SList():
         
 
     def order_list_merge(l1 = None, l2 = None):
+        # 链表为 None 情况
         if not l1 or not l2:
             return l1 or l2
         q1        = l1.head.next
@@ -153,7 +156,79 @@ class SList():
             q_new_ptr = q_new_ptr.next
         q_new_ptr.next = q1 if q1 else q2
         return q_new
-    
+
+
+    def delete_node_by_node(self, target, target_pre):
+        if not target or not target_pre:
+            return
+        target_pre.next = target.next
+
+    def remove_nth_from_end(self, n):
+        if n == 0:
+            print('n == 0 cant')
+            return
+        fast     = self.head
+        slow     = self.head
+        slow_pre = self.head
+        while fast and n > 1:
+            n    -= 1
+            fast = fast.next
+        # 说明已经到尾部，n 超过链表长度
+        if not fast.next:
+            print('over size, cant')
+            return
+        while fast.next:
+            slow_pre = slow
+            slow     = slow.next
+            fast     = fast.next
+        self.delete_node_by_node(slow, slow_pre)
+        print("remove data is {}".format(slow.data))
+
+    def mid_node(self):
+        # 空链表
+        if not self.head.next:
+            return
+        fast = self.head
+        slow = self.head
+        # 判断 fast.next 保证了 fast.next.next 不报错
+        while fast.next and slow.next:
+            fast = fast.next.next
+            slow = slow.next
+            if not fast:
+                return slow
+        return slow
+
+def test_mid_node():
+    sl = SList()
+    # 空链表
+    print(sl)
+    print('mid is {}'.format(sl.mid_node()))
+    # 一个节点
+    sl.head_insert(3)
+    print(sl)
+    print('mid is {}'.format(sl.mid_node()))
+    # 两个节点
+    sl.head_insert(4)
+    print(sl)
+    print('mid is {}'.format(sl.mid_node()))
+
+def test_remove_nth_from_end():
+    sl = SList()
+    # 空链表
+    sl.remove_nth_from_end(0)
+    # 1 个
+    sl.head_insert(1)
+    sl.remove_nth_from_end(0)
+    sl.remove_nth_from_end(1)
+    # 2 个
+    sl.head_insert(2)
+    sl.head_insert(3)
+    sl.remove_nth_from_end(0)
+    sl.remove_nth_from_end(3)
+    sl.remove_nth_from_end(1)
+
+    sl.head_insert(4)
+    print(sl)
 
 def test_head_insert():
     sl = SList()
@@ -207,17 +282,22 @@ def test_has_ring():
 
 def test_merge():
     sl1 = SList()
-    sl1.ascend_order_insert(4)
-    sl1.ascend_order_insert(3)
-    sl1.ascend_order_insert(5)
-    print(sl1)
-
     sl2 = SList()
-    sl2.ascend_order_insert(8)
-    sl2.ascend_order_insert(18)
-    sl2.ascend_order_insert(1)
-    print(sl2)
+    # 空链表
     print(SList.order_list_merge(sl1, sl2))
+    # 一个节点
+    sl1.ascend_order_insert(4)
+    sl2.ascend_order_insert(8)
+    print(sl1)
+    print(SList.order_list_merge(sl1, sl2))
+    # sl1.ascend_order_insert(3)
+    # sl1.ascend_order_insert(5)
+    # print(sl1)
+
+    # sl2.ascend_order_insert(18)
+    # sl2.ascend_order_insert(1)
+    # print(sl2)
+    # print(SList.order_list_merge(sl1, sl2))
 
 if __name__ == "__main__":
     print('test_head_insert-------------')
@@ -230,6 +310,10 @@ if __name__ == "__main__":
     test_has_ring()
     print('test_merge-------------')
     test_merge()
+    print('test_remove_nth_from_end-------------')
+    test_remove_nth_from_end()
+    print('ttest_mid_node-------------')
+    test_mid_node()
     # sl = SList()
     # sl.head_insert(1)
     # sl.head_insert(2)
