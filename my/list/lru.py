@@ -17,42 +17,92 @@ class Node():
         self.pre  = None
         self.next = None
 
+# 1. 查询已有缓存，说明最近用过，要放到链表首部，表示最近最频繁使用
+# 2. 查询未有缓存，返回 -1
+# 3. 插入新缓存，未超过上限，插入头部
+# 4. 插入新缓存，超过上限，插入头部，将尾部缓存删除
 class LRUCache():
     def __init__(self, capacity:int):
         self.capacity  = capacity
         self.head      = Node()
         self.tail      = self.head
-        self.key_2_val = {}
+        self.key_2_node = {}
+        self.len       = 0
     
     def back_insert_by_node(self, node, new_node):
         if not node or not new_node:
             return
-        new_node.pre  = node
-        new_node.next = node.next
+        new_node.pre      = node
+        new_node.next     = node.next
+        node.next         = new_node
+        self.len          += 1
+        # 用于尾指针
+        if self.tail == self.head or node == self.tail:
+            self.tail = new_node
+        else:
+            new_node.next.pre = new_node
     
     def delete_node_by_node(self, node):
         if not node:
             return
         node.pre.next = node.next
-        node.next.pre = node.pre
+        # 这里就很不好
+        if node == self.tail:
+            self.tail = node.pre
+        else:
+            node.next.pre = node.pre
+        self.len      -= 1
         return node
 
 
     def put(self, key, val):
-        _val = self.key_2_val.get(key)
-        q    = self.head
+        ptr = self.key_2_node.get(key)
         # 更新缓存，且放到最开头
-        if _val:
-            while q.next:
-                if q.key == key:
-                    self.delete_node_by_node(q)
-                    self.back_insert_by_node(self.head, q)
-                    break
+        if ptr:
+            self.delete_node_by_node(ptr)
+            ptr.val = val
+            self.back_insert_by_node(self.head, ptr)
+        # 新增，若超过上限要去掉尾结点
         else:
-            pass
+            new_node             = Node(key, val)
+            self.key_2_node[key] = new_node
+            self.back_insert_by_node(self.head, new_node)
+            # print(self)
+            if self.len > self.capacity:
+                # print('tailval is {}'.format(self.tail.val))
+                # print('tailval pre is {}'.format(self.tail.pre.val))
+                self.key_2_node.pop(self.tail.key)
+                self.delete_node_by_node(self.tail)
+                # print('tailval is {}'.format(self.tail.val))
 
-        
+
 
     def get(self, key):
-        val = self.key_2_val.get(key)
-        return val if val else -1 
+        node = self.key_2_node.get(key)
+        if not node:
+            return -1
+        self.delete_node_by_node(node)
+        self.back_insert_by_node(self.head, node)
+        return node.val
+    
+    def __repr__(self):
+        q = self.head
+        t = []
+        while q.next:
+            q = q.next
+            t.append(str(q.val))
+        return '<->'.join(t)
+
+if __name__ == "__main__":
+    lru = LRUCache(2)    
+    print(lru)
+    print(lru.get(1))
+    lru.put(1, 1)
+    print(lru)
+    lru.put(2, 2)
+    print(lru)
+    lru.put(3, 3)
+    print(lru)
+
+    print(lru.get(2))
+    print(lru)
